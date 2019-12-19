@@ -1,29 +1,10 @@
-run = function(N){
-	print("START")
-	main(N)
-	print("COMPLETE")
-	}
+# libs ------------------------------------------------------
 
-main = function(N){
-	for(i in 1:N){
-		print(paste("Herd Simulation",i))
-		scrapiesim(i)
-		}
-	print("End Main")
-	}
-
-scrapiesim = function(i){
-	timelim = 15 #observations over 15 years
-	data = matrix(ncol = 31, nrow = timelim)
-	
+# genotype frequencies & variables------------------------------------------------------
 	##the PrP genotypes are noted as below:
 	##1. arr/arr 2. arr/arq 3. arr/arh 4. arr/ahq 5. arq/arq
 	##6. arq/ahq 7. arq/arh 8. ahq/ahq 9. ahq/arh 10. arh/arh
 	##11. arr/vrq 12. arq/vrq 13. ahq/vrq 14. arh/vrq 15. vrq/vrq
-
-	#names the matrix columns
-	colnames(data) = c("S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "S14", "S15","I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "I10", "I11", "I12", "I13", "I14", "I15",
-	"Total death count")
 
 	#breed genotype frequencies: ARR/ARR=0.066, ARR/ARQ = 0.066 etc...
 	Equal = c(0.066,0.066,0.066,0.066,0.066,0.066,0.066,0.066,0.066,0.066,0.066,0.066,0.066,0.066,0.066)
@@ -41,21 +22,39 @@ scrapiesim = function(i){
 	Ivesi = c(0,0.063,0,0,0.563,0,0.281,0,0,0,0.031,0,0,0,0)
 	SPBM = c(0.102,0.225,0.041,0.020,0.265,0.163,0.061,0.041,0.02,0,0.041,0.02,0,0,0)
 
+	hrate = 0.6
+	vrate = 0.8
+	grate = 0.5
+	arate = 0.1
+	drate = 0.1
+
+# simulation ------------------------------------------------------
+
+scrapiesim = function(breed, hrate, vrate, grate, arate, drate){
+
+
 	#starting values at t=0
-	S = rpois(15, 300*Equal) #starting susceptibles of each genotype, currently set up for a population of 300 susceptibles with equal genotype frequencies
-	for(m in 1:15){
+	S = rpois(15, 300*breed) #starting susceptibles of each genotype, currently set up for a population of 300 susceptibles with equal genotype frequencies
+	for(m in 1:length(breed)){
 		if(is.na(S[m]) == TRUE){S[m] = 0}
 		}
 
-	Ih = c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0) #initially 1 wildtype infected. If Ih[1]=1, then there is 1 ARR/ARR individual infected etc
+	Ih = c(0,0,0,0,1,0,0,0,0,0,0,0,0,0,0) #initially infected. If Ih[1]=1, then there is 1 individual of that genotype infected etc
 	Iv = c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0) #vertically infected
 	R = c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0) #death count
-	og = c(S, Ih, sum(R)) #no. sus and infected at t=0
-	b = c(0,0.0002,0,0.0002,0.017,0.0045,0.0026,0.0025,0,0.001,0.0031,0.11,0.00035,0.202,0.272) #horizontal infection mean rates
-	v= c(0,0.0004,0,0.0004,0.034,0.009,0.0052,0.005,0,0.002,0.0062,0.22,0.0007,0.404,0.544) #vertical infection mean rates
-	g = 0.5 #prion death rate
-	a = 0.1 #birth rate
-	d = 0.1 #natural causes death rate
+	
+	#set up vectors for plotting later
+	timelim = 15 #observations over 15 years
+	Io = c(sum(Ih))
+	dead = c(sum(R))
+	susc = c(sum(S))
+
+	rel.inf = c(0,0.0007,0,0.00055,0.068,0.016,0.01,0.0092,0,0.0037,0.012,0.41,0.0013,0.74,1) #infection relative risk
+	b = rel.inf*hrate #relative horizontal infection risk
+	v = rel.inf*vrate #relative vertical infection risk
+	g = grate #prion death rate
+	a = arate #birth rate
+	d = drate #natural causes death rate
 
 	for(j in 1:timelim){
 		totalinf = sum(Ih) + sum(Iv)
@@ -110,28 +109,38 @@ scrapiesim = function(i){
 			Iv[l] = nIv[l] + Iva
 		}
 
-		Io = Ih + Iv
-		dead = sum(R)
-		row = c(S, Io, dead)
-		data[j,] = row
+		Io[j+1] = sum(Ih) + sum(Iv)
+		dead[j+1] = sum(R)
+		susc[j+1] = sum(S)
 		}
 
 	#making the matrix
-	data = rbind(og, data)
+	data = cbind(susc, Io, dead)
 	years = c(0:timelim)
 	data = cbind(years, data)
 	print(data)
-	write.csv(data, file = paste("uninf",i,".csv"))
+
+	par(mfrow=c(1, 3))
+	plot(susc ~ years, xlab = "Time", ylab = "No. Healthy")
+	lines(years, susc)
+
+	plot(Io ~ years, xlab = "Time", ylab = "No. Infected")
+	lines(years, Io)
+
+	plot(dead ~ years, xlab = "Time", ylab = "No. Dead")
+	lines(years, dead)
 	}
 
-#calculates new susceptibles
+#calculates new susceptibles -----------------------------------------------------
+
 newS = function(S, nb, Sd){ 
 	Sn = S - nb - Sd
 	if(Sn < 0){Sn=0}
 	return(Sn)
 	}
 
-#calculates new horizontally infected
+#calculates new horizontally infected ------------------------------------------
+
 newIh = function(S, Ih, nb, Ihg, Ihd){
 	Ihn = Ih + nb - Ihg - Ihd
 if(nb > S){Ihn = Ih + S - Ihg - Ihd} #stops more sheep being infected than actually exist
@@ -139,27 +148,35 @@ if(nb > S){Ihn = Ih + S - Ihg - Ihd} #stops more sheep being infected than actua
 	return(Ihn)
 	}
 
-#calculates new vertically infected
+#calculates new vertically infected ---------------------------------------------
+
 newIv = function(Iv, Ivg, Ivd){
 	Ivn = Iv - Ivg - Ivd
 	if(Ivn<0){Ivn=0}
 	return(Ivn)
 	}
 
-#calculates total deaths
+#calculates total deaths -----------------------------------------------------
+
 newR = function(R, Ivg, Ihg){
 	Rn = R + Ivg + Ihg #changed to prion only deaths
 	return(Rn)
 	}
 
-#calculates genotype frequencies for homozygous genotypes
+#calculates genotype frequencies for homozygous genotypes ---------------------
+
 hombirths = function(allele1, alleles){
 	genfreq = (allele1/alleles)^2
 	return(genfreq)
 	}
 
-#calculates genotype frequencies for heterozygous genotypes
+#calculates genotype frequencies for heterozygous genotypes --------------------
+
 hetbirths = function(allele1, alleles, allele2){
 	genfreq = 2*(allele1/alleles)*(allele2/alleles)
 	return(genfreq)
 	}
+
+#RUN SIM ----------------------------------------------------------------------
+
+scrapiesim(Equal, hrate, vrate, grate, arate, drate)
