@@ -1,6 +1,6 @@
 # libs ------------------------------------------------------
 
-# genotype frequencies & variables------------------------------------------------------
+# genotype frequencies ------------------------------------------------------
 	##the PrP genotypes are noted as below:
 	##1. arr/arr 2. arr/arq 3. arr/arh 4. arr/ahq 5. arq/arq
 	##6. arq/ahq 7. arq/arh 8. ahq/ahq 9. ahq/arh 10. arh/arh
@@ -22,11 +22,6 @@
 	Ivesi = c(0,0.063,0,0,0.563,0,0.281,0,0,0,0.031,0,0,0,0)
 	SPBM = c(0.102,0.225,0.041,0.020,0.265,0.163,0.061,0.041,0.02,0,0.041,0.02,0,0,0)
 
-	hrate = 0.6
-	vrate = 0.8
-	grate = 0.5
-	arate = 0.1
-	drate = 0.1
 
 # simulation ------------------------------------------------------
 
@@ -44,7 +39,7 @@ scrapiesim = function(breed, hrate, vrate, grate, arate, drate){
 	R = c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0) #death count
 	
 	#set up vectors for plotting later
-	timelim = 15 #observations over 15 years
+	timelim = 25 #observations over n years
 	Io = c(sum(Ih))
 	dead = c(sum(R))
 	susc = c(sum(S))
@@ -177,6 +172,12 @@ hetbirths = function(allele1, alleles, allele2){
 	return(genfreq)
 	}
 
-#RUN SIM ----------------------------------------------------------------------
+#variables & RUN SIM ----------------------------------------------------------------------
 
-scrapiesim(Equal, hrate, vrate, grate, arate, drate)
+	hrate = 0.4
+	vrate = 0.5
+	grate = 0.5
+	arate = 0.2
+	drate = 0.15
+
+scrapiesim(Finsheep, hrate, vrate, grate, arate, drate)
