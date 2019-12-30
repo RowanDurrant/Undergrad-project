@@ -174,10 +174,10 @@ hetbirths = function(allele1, alleles, allele2){
 
 #variables & RUN SIM ----------------------------------------------------------------------
 
-	hrate = 0.4
-	vrate = 0.5
-	grate = 0.5
-	arate = 0.2
-	drate = 0.15
+	hrate = 0.4 #maximum horizontal infection risk
+	vrate = 0.5 #maximum vertical infection risk
+	grate = 0.5 #death rate of infected sheep
+	arate = 0.2 #birth rate
+	drate = 0.15 #non-prion death rate
 
 scrapiesim(Finsheep, hrate, vrate, grate, arate, drate)
