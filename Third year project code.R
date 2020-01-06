@@ -25,11 +25,11 @@
 
 # simulation ------------------------------------------------------
 
-scrapiesim = function(breed, hrate, vrate, grate, arate, drate){
+scrapiesim = function(breed, hrate, vrate, grate, arate, drate, time, pop){
 
 
 	#starting values at t=0
-	S = rpois(15, 300*breed) #starting susceptibles of each genotype, currently set up for a population of 300 susceptibles with equal genotype frequencies
+	S = rpois(15, pop*breed) #starting susceptibles of each genotype
 	for(m in 1:length(breed)){
 		if(is.na(S[m]) == TRUE){S[m] = 0}
 		}
@@ -39,7 +39,7 @@ scrapiesim = function(breed, hrate, vrate, grate, arate, drate){
 	R = c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0) #death count
 	
 	#set up vectors for plotting later
-	timelim = 25 #observations over n years
+	timelim = time #observations over n years
 	Io = c(sum(Ih))
 	dead = c(sum(R))
 	susc = c(sum(S))
@@ -122,7 +122,7 @@ scrapiesim = function(breed, hrate, vrate, grate, arate, drate){
 	plot(Io ~ years, xlab = "Time", ylab = "No. Infected")
 	lines(years, Io)
 
-	plot(dead ~ years, xlab = "Time", ylab = "No. Dead")
+	plot(dead ~ years, xlab = "Time", ylab = "No. Died of Scrapie")
 	lines(years, dead)
 	}
 
@@ -174,10 +174,12 @@ hetbirths = function(allele1, alleles, allele2){
 
 #variables & RUN SIM ----------------------------------------------------------------------
 
-	hrate = 0.4 #maximum horizontal infection risk
-	vrate = 0.5 #maximum vertical infection risk
-	grate = 0.5 #death rate of infected sheep
-	arate = 0.2 #birth rate
-	drate = 0.15 #non-prion death rate
+	hrate = 0.14 #horizontal transmission rate
+	vrate = 0.25 #vertical transmission rate
+	grate = 0.5  #scrapie death rate
+	arate = 0.25 #birth rate
+	drate = 0.2  #non-scrapie death rate
+	time = 75    #simulation time scale
+	pop = 1000   #starting healthy population size
 
-scrapiesim(Finsheep, hrate, vrate, grate, arate, drate)
+scrapiesim(Kivircik, hrate, vrate, grate, arate, drate, time, pop)
