@@ -115,15 +115,10 @@ scrapiesim = function(breed, hrate, vrate, grate, arate, drate, time, pop){
 	data = cbind(years, data)
 	print(data)
 
-	par(mfrow=c(1, 3))
-	plot(susc ~ years, xlab = "Time", ylab = "No. Healthy")
-	lines(years, susc)
-
-	plot(Io ~ years, xlab = "Time", ylab = "No. Infected")
-	lines(years, Io)
-
-	plot(dead ~ years, xlab = "Time", ylab = "No. Died of Scrapie")
-	lines(years, dead)
+  plot(susc ~ years, xlab = "Time", ylab = "No. Healthy", ylim = c(0,pop+100))
+  lines(years, susc)
+  points(Io ~ years, xlab = "Time", ylab = "No. Infected", col = "red")
+   lines(years, Io, col = "red") 
 	}
 
 #calculates new susceptibles -----------------------------------------------------
